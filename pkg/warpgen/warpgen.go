@@ -12,8 +12,8 @@ import (
 type Warp struct {
 	FileName    string   `json:"file_name"`
 	FileType    string   `json:"file_type"`
-	FileHash    string   `json:"file_hash"`
 	FileSize    int      `json:"file_size"`
+	FileHash    string   `json:"file_hash"`
 	TotalChunks int      `json:"total_chunks"`
 	ChunkSize   int      `json:"chunk_size"`
 	Chunk       []string `json:"chunk"`

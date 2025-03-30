@@ -5,7 +5,11 @@ package tracker;
 option go_package = "internal/tracker/pb";
 
 service TrackerService {
-    rpc SendResourceRequest(Empty) returns (Empty);
+    rpc SendResourceRequest(ResourceRequest) returns (Empty);
+}
+
+message ResourceRequest{
+    string Msg = 1;
 }
 
 message Empty {}
