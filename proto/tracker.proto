@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package tracker;
+
+option go_package = "internal/tracker/pb";
+
+service TrackerService {
+    rpc SendResourceRequest(Empty) returns (Empty);
+}
+
+message Empty {}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package node;
+
+option go_package = "internal/node/pb";
+
+
+service NodeService {
+    rpc Ping(Empty) returns (Pong);
+}
+
+message Pong {
+    string time = 1;
+}
+
+
+message Empty {}
