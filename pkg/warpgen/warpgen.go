@@ -4,14 +4,14 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
-	"strings"
+	"path/filepath"
 )
 
 type Warp struct {
 	FileName    string   `json:"file_name"`
-	FileType    string   `json:"file_type"`
 	FileSize    int      `json:"file_size"`
 	FileHash    string   `json:"file_hash"`
 	TotalChunks int      `json:"total_chunks"`
@@ -19,51 +19,79 @@ type Warp struct {
 	Chunk       []string `json:"chunk"`
 }
 
+const chunkSize = 1 << 20
+
+// function to create warp file
 func CreateWarpFile(filePath string) {
 
-	data, err := os.ReadFile(filePath)
+	// get absolute file path
+	absFilePath, err := filepath.Abs(filePath)
 	if err != nil {
-		log.Fatalf("error %v", err)
+		log.Fatalf("error getting absolute path: %v", err)
 	}
 
-	fileSize := len(data)
-	chunkSize := 1 << 20
+	// getting file meta data
+	fileInfo, err := os.Stat(absFilePath)
+	if err != nil {
+		log.Fatalf("error reading file stats: %v", err)
+	}
 
+	// open file pointer
+	file, err := os.Open(absFilePath)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer file.Close()
+
+	// create warp
 	warp := &Warp{
-		FileName:  "sp",
-		FileType:  "pdf",
-		FileSize:  fileSize,
+		FileName:  fileInfo.Name(),
+		FileSize:  int(fileInfo.Size()),
 		ChunkSize: chunkSize,
 	}
 
-	st := 0
-	for st < fileSize {
+	// stream reading from file
+	buffer := make([]byte, chunkSize)
+	for {
+		n, err := file.Read(buffer)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("error reading file: %v", err)
+		}
 
-		en := min(fileSize, chunkSize+st)
-		currChunk := data[st:en]
-
-		hashStr := hash(currChunk)
-
+		// hash the chunk
+		hashStr := hash(buffer[:n])
 		warp.Chunk = append(warp.Chunk, hashStr)
-		st = en
+
+		// keep on computing file hash
+		warp.FileHash = hash([]byte(warp.FileHash + hashStr))
 	}
 
+	// set total chunks
 	warp.TotalChunks = len(warp.Chunk)
 
-	warpHashStr := warp.FileName + warp.FileType + strings.Join(warp.Chunk, "")
+	// create warp file
+	outputDir := filepath.Dir(absFilePath)
+	warpFilePath := filepath.Join(outputDir, warp.FileName+".json")
+	warpFile, err := os.Create(warpFilePath)
+	if err != nil {
+		log.Fatalf("error creating warp file: %v", err)
+	}
+	defer warpFile.Close()
 
-	warp.FileHash = hash([]byte(warpHashStr))
+	json.NewEncoder(warpFile).Encode(warp)
 
-	file, _ := os.Create("storage/" + warp.FileName + "." + warp.FileType + ".json")
-	defer file.Close()
-
-	json.NewEncoder(file).Encode(warp)
+	fmt.Printf("warp file created: %s\n", warpFilePath)
 }
 
+// function to read warp file
 func ReadWarpFile(warpFilePath string) *Warp {
+	// open warpfile in read mode
 	data, err := os.ReadFile(warpFilePath)
 	if err != nil {
-		log.Fatalf("error %v", err)
+		log.Fatalf("error reading warp file%v", err)
 	}
 
 	var warp *Warp
@@ -73,6 +101,7 @@ func ReadWarpFile(warpFilePath string) *Warp {
 	return warp
 }
 
+// function to hash in sha256
 func hash(data []byte) string {
 	hash := sha256.Sum256(data)
 	return fmt.Sprintf("%x", hash)

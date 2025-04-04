@@ -1,12 +1,16 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/Sp92535/pkg/warpgen"
 )
 
 func main() {
-	warpgen.CreateWarpFile("storage/ITL_demo.mp4")
-	// warpData := warpgen.ReadWarpFile("storage/ngo.json")
-
-	// fmt.Printf("%+v\n", warpData)
+	if len(os.Args) < 2 {
+		log.Fatalf("please provide file path.")
+	}
+	filePath := os.Args[1]
+	warpgen.CreateWarpFile(filePath)
 }
