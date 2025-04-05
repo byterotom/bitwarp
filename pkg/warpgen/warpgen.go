@@ -88,8 +88,15 @@ func CreateWarpFile(filePath string) {
 
 // function to read warp file
 func ReadWarpFile(warpFilePath string) *Warp {
+
+	// get absolute file path
+	absFilePath, err := filepath.Abs(warpFilePath)
+	if err != nil {
+		log.Fatalf("error getting absolute path: %v", err)
+	}
+
 	// open warpfile in read mode
-	data, err := os.ReadFile(warpFilePath)
+	data, err := os.ReadFile(absFilePath)
 	if err != nil {
 		log.Fatalf("error reading warp file%v", err)
 	}
