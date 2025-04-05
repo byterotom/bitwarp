@@ -9,26 +9,27 @@ import (
 )
 
 func main() {
-	// initialize queue
-	node.QueueInit()
-	defer node.StopQueue()
-
-	// run tracker client
-	node.RunTrackerClient()
-
-	// consume message
-	node.ConsumeMessage()
-
 	if len(os.Args) < 2 || os.Args[1] == "" {
 		log.Fatalf("please specify warp file path")
 	}
 
 	warp := warpgen.ReadWarpFile(os.Args[1])
-	log.Println(os.Args[1])
-	if warp == nil{
+	if warp == nil {
 		log.Fatalf("invalid path")
 	}
-	
+
+	// initialize queue
+	node.QueueInit()
+	defer node.StopQueue()
+
+	// initialize tracker client
+	node.TrackerClientInit()
+	// go node.RunNodeServer()
+	defer node.StopNode()
+
+	// consume message
+	node.ConsumeMessage()
+
 	node.SendResourceRequest(warp.FileHash)
 
 	select {} // temporarily blocking

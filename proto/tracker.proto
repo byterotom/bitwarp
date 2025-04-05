@@ -9,7 +9,7 @@ service TrackerService {
 }
 
 message ResourceRequest{
-    string Msg = 1;
+    string FileHash = 1;
 }
 
 message Empty {}

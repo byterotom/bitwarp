@@ -6,6 +6,8 @@ import (
 	"time"
 
 	pbtr "github.com/Sp92535/internal/tracker/pb"
+	pbno "github.com/Sp92535/internal/node/pb"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -13,28 +15,25 @@ import (
 var trackerClient pbtr.TrackerServiceClient
 var trackerConn *grpc.ClientConn
 
-func RunNodeClient() {
-	conn, err := grpc.NewClient(":6969", grpc.WithTransportCredentials(insecure.NewCredentials()))
+var nodeClient pbno.NodeServiceClient
+var nodeConn *grpc.ClientConn
+
+// function to declare node client
+func NodeClientInit() {
+	nodeConn, err := grpc.NewClient(":6969", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("ERROR :%v", err)
 	}
-	defer conn.Close()
 
-	// client := pbno.NewNodeServiceClient(conn)
-
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	// defer cancel()
-
-	// res, err := client.Ping(ctx, &pbno.Empty{})
-	// if err != nil {
-	// 	log.Fatalf("Could not Ping: %v", err)
-	// }
-
-	// fmt.Println("Server Response:", res.Time)
+	nodeClient = pbno.NewNodeServiceClient(nodeConn)
 }
 
-func RunTrackerClient() {
-	trackerConn, err := grpc.NewClient(":9999", grpc.WithTransportCredentials(insecure.NewCredentials()))
+// function to declare tracker client
+func TrackerClientInit() {
+
+	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
+	
+	trackerConn, err := grpc.NewClient(":9999", opts)
 	if err != nil {
 		log.Fatalf("error connecting tracker :%v", err)
 	}
@@ -44,13 +43,14 @@ func RunTrackerClient() {
 
 func StopNode() {
 	trackerConn.Close()
+	nodeConn.Close()
 }
 
 func SendResourceRequest(msg string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := trackerClient.SendResourceRequest(ctx, &pbtr.ResourceRequest{Msg: msg})
+	_, err := trackerClient.SendResourceRequest(ctx, &pbtr.ResourceRequest{FileHash: msg})
 	if err != nil {
 		log.Fatalf("could not invoke rpc: %v", err)
 	}

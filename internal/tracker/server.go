@@ -16,8 +16,9 @@ func NewTrackerServer() *TrackerServer {
 	return &TrackerServer{}
 }
 
+// function to run tracker server
 func RunTrackerServer() {
-	
+
 	listner, err := net.Listen("tcp", ":9999")
 	if err != nil {
 		log.Fatalf("error initializing listner: %v", err)
@@ -25,10 +26,9 @@ func RunTrackerServer() {
 
 	grpcServer := grpc.NewServer()
 	trackerServer := NewTrackerServer()
-
 	pbtr.RegisterTrackerServiceServer(grpcServer, trackerServer)
 
-	log.Printf("GRPC tracker server running on 9999...")
+	log.Printf("grpc tracker server running on 9999...")
 	if err := grpcServer.Serve(listner); err != nil {
 		log.Fatalf("Failed to Serve: %v", err)
 	}

@@ -46,8 +46,8 @@ func StopExchange() {
 	conn.Close()
 }
 
-// function to publish message
-func PublishMessage(data string) {
+// function to publish resource request
+func PublishRequest(data string) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -63,6 +63,6 @@ func PublishMessage(data string) {
 		},
 	)
 	if err != nil {
-		log.Fatalf("error publishing message: %v", err)
+		log.Fatalf("error publishing request to nodes: %v", err)
 	}
 }

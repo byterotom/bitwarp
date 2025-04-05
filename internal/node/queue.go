@@ -65,13 +65,13 @@ func ConsumeMessage() {
 		nil,    // args
 	)
 
+	if err != nil {
+		log.Fatalf("error consuming message: %v", err)
+	}
+
 	go func() {
 		for d := range msgs {
 			log.Printf(" [x] %s", d.Body)
 		}
 	}()
-
-	if err != nil {
-		log.Fatalf("error publishing message: %v", err)
-	}
 }

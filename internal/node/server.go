@@ -16,6 +16,7 @@ func NewNodeServer() *NodeServer {
 	return &NodeServer{}
 }
 
+// function to run node server 
 func RunNodeServer() {
 	listner, err := net.Listen("tcp", ":6969")
 	if err != nil {
