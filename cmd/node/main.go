@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -18,6 +19,8 @@ func main() {
 		log.Fatalf("invalid path")
 	}
 
+	n := node.NewNode(warp)
+
 	// initialize queue
 	node.QueueInit()
 	defer node.StopQueue()
@@ -30,7 +33,9 @@ func main() {
 	// consume message
 	node.ConsumeMessage()
 
-	node.SendResourceRequest(warp.FileHash)
+	n.SendResourceRequest()
+
+	fmt.Println(n)
 
 	select {} // temporarily blocking
 }

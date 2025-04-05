@@ -1,12 +1,10 @@
 package node
 
 import (
-	"context"
 	"log"
-	"time"
 
-	pbtr "github.com/Sp92535/internal/tracker/pb"
 	pbno "github.com/Sp92535/internal/node/pb"
+	pbtr "github.com/Sp92535/internal/tracker/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -32,7 +30,7 @@ func NodeClientInit() {
 func TrackerClientInit() {
 
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
-	
+
 	trackerConn, err := grpc.NewClient(":9999", opts)
 	if err != nil {
 		log.Fatalf("error connecting tracker :%v", err)
@@ -44,14 +42,4 @@ func TrackerClientInit() {
 func StopNode() {
 	trackerConn.Close()
 	nodeConn.Close()
-}
-
-func SendResourceRequest(msg string) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	_, err := trackerClient.SendResourceRequest(ctx, &pbtr.ResourceRequest{FileHash: msg})
-	if err != nil {
-		log.Fatalf("could not invoke rpc: %v", err)
-	}
 }
