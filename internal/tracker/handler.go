@@ -2,38 +2,34 @@ package tracker
 
 import (
 	"context"
+	"sync"
 
 	pbtr "github.com/Sp92535/internal/tracker/pb"
 )
 
-var db map[string][][]string
+var mu sync.Mutex
+var db map[string]map[string]struct{} = make(map[string]map[string]struct{})
 
 func (p *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetResourceHoldersRequest) (*pbtr.GetResourceHoldersResponse, error) {
-	if db == nil {
-		db = make(map[string][][]string)
+
+	PublishRequest(req.FileHash)
+	var holders []string
+	for ip := range db[req.FileHash] {
+		holders = append(holders, ip)
 	}
 
-	db[req.FileHash] = make([][]string, len(req.Status))
-	PublishRequest(req.FileHash)
 	return &pbtr.GetResourceHoldersResponse{
-		FileHash: req.FileHash,
-		Holders:  []string{"a", "b", "c"},
+		Holders: holders,
 	}, nil
 }
 
 func (p *TrackerServer) RegisterResourceHolder(ctx context.Context, res *pbtr.RegisterResourceHolderRequest) (*pbtr.Empty, error) {
-	if db == nil {
-		db = make(map[string][][]string)
+	mu.Lock()
+	defer mu.Unlock()
+	if db[res.FileHash] == nil {
+		db[res.FileHash] = make(map[string]struct{})
 	}
-
-	adr, ok := db[res.FileHash]
-	if ok {
-		for idx, val := range res.Status {
-			if val {
-				adr[idx] = append(adr[idx], res.Address)
-			}
-		}
-	}
+	db[res.FileHash][res.Address] = struct{}{}
 
 	return &pbtr.Empty{}, nil
 }

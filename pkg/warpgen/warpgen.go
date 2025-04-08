@@ -22,7 +22,7 @@ type Warp struct {
 const chunkSize = 1 << 20
 
 // function to create warp file
-func CreateWarp(filePath string) {
+func CreateWarpFile(filePath string) {
 
 	// get absolute file path
 	absFilePath, err := filepath.Abs(filePath)

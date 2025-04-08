@@ -2,11 +2,8 @@ package node
 
 import (
 	"context"
-	"errors"
-	"io/fs"
 	"log"
 	"os"
-	"strconv"
 
 	pbtr "github.com/Sp92535/internal/tracker/pb"
 	"github.com/Sp92535/pkg"
@@ -39,41 +36,29 @@ func (n *Node) SendResourceRequest() {
 
 	req := &pbtr.GetResourceHoldersRequest{
 		FileHash: n.warp.FileHash,
-		Status:   n.status,
 	}
 	res, err := trackerClient.GetResourceHolders(ctx, req)
 	if err != nil {
 		log.Fatalf("could not invoke rpc: %v", err)
 	}
 	n.holders = res.Holders
+	log.Println(n.holders)
 }
 
 func (n *Node) SendResourceResponse(fileHash string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	chunkDir := "storage/temp/" + fileHash + "/"
-
-	chunks, err := os.ReadDir(chunkDir)
-	if errors.Is(err, fs.ErrNotExist) {
+	if n.warp.FileHash != fileHash {
 		return
-	}
-	if err != nil {
-		log.Fatalf("error reading chunks dir: %v", err)
-	}
-
-	for _, chunkNo := range chunks {
-		idx, _ := strconv.Atoi(chunkNo.Name())
-		n.status[idx] = true
 	}
 
 	req := &pbtr.RegisterResourceHolderRequest{
 		FileHash: n.warp.FileHash,
-		Status:   n.status,
 		Address:  n.address,
 	}
 
-	_, err = trackerClient.RegisterResourceHolder(ctx, req)
+	_, err := trackerClient.RegisterResourceHolder(ctx, req)
 	if err != nil {
 		log.Fatalf("could not invoke rpc: %v", err)
 	}

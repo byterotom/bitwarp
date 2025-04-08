@@ -11,17 +11,14 @@ service TrackerService {
 
 message GetResourceHoldersRequest{
     string FileHash = 1;
-    repeated bool Status = 2;
 }
 
 message RegisterResourceHolderRequest{
     string FileHash = 1;
-    repeated bool Status = 2;
     string Address = 3;
 }
 
 message GetResourceHoldersResponse{
-    string FileHash = 1;
     repeated string Holders = 2;
 }
 
