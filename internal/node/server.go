@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -16,9 +17,9 @@ func NewNodeServer() *NodeServer {
 	return &NodeServer{}
 }
 
-// function to run node server 
-func RunNodeServer() {
-	listner, err := net.Listen("tcp", ":6969")
+// function to run node server
+func (n *Node) RunNodeServer() {
+	listner, err := net.Listen("tcp", ":0") // dynamic port for os to choose available one
 	if err != nil {
 		log.Fatalf("error initializing listner: %v", err)
 	}
@@ -28,7 +29,11 @@ func RunNodeServer() {
 
 	pbno.RegisterNodeServiceServer(grpcServer, nodeServer)
 
-	log.Printf("GRPC node server running on 6969...")
+	serverPort := listner.Addr().(*net.TCPAddr).Port
+
+	n.address = n.address + ":" + fmt.Sprint(serverPort)
+
+	log.Printf("GRPC server running on %d...", serverPort)
 	if err := grpcServer.Serve(listner); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

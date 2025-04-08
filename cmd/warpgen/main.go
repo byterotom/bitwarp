@@ -12,5 +12,5 @@ func main() {
 		log.Fatalf("please provide file path.")
 	}
 	filePath := os.Args[1]
-	warpgen.CreateWarpFile(filePath)
+	warpgen.CreateWarp(filePath)
 }

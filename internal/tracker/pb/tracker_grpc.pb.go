@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TrackerService_SendResourceRequest_FullMethodName = "/tracker.TrackerService/SendResourceRequest"
+	TrackerService_GetResourceHolders_FullMethodName     = "/tracker.TrackerService/GetResourceHolders"
+	TrackerService_RegisterResourceHolder_FullMethodName = "/tracker.TrackerService/RegisterResourceHolder"
 )
 
 // TrackerServiceClient is the client API for TrackerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TrackerServiceClient interface {
-	SendResourceRequest(ctx context.Context, in *ResourceRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetResourceHolders(ctx context.Context, in *GetResourceHoldersRequest, opts ...grpc.CallOption) (*GetResourceHoldersResponse, error)
+	RegisterResourceHolder(ctx context.Context, in *RegisterResourceHolderRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type trackerServiceClient struct {
@@ -37,10 +39,20 @@ func NewTrackerServiceClient(cc grpc.ClientConnInterface) TrackerServiceClient {
 	return &trackerServiceClient{cc}
 }
 
-func (c *trackerServiceClient) SendResourceRequest(ctx context.Context, in *ResourceRequest, opts ...grpc.CallOption) (*Empty, error) {
+func (c *trackerServiceClient) GetResourceHolders(ctx context.Context, in *GetResourceHoldersRequest, opts ...grpc.CallOption) (*GetResourceHoldersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetResourceHoldersResponse)
+	err := c.cc.Invoke(ctx, TrackerService_GetResourceHolders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *trackerServiceClient) RegisterResourceHolder(ctx context.Context, in *RegisterResourceHolderRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
-	err := c.cc.Invoke(ctx, TrackerService_SendResourceRequest_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, TrackerService_RegisterResourceHolder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +63,8 @@ func (c *trackerServiceClient) SendResourceRequest(ctx context.Context, in *Reso
 // All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility.
 type TrackerServiceServer interface {
-	SendResourceRequest(context.Context, *ResourceRequest) (*Empty, error)
+	GetResourceHolders(context.Context, *GetResourceHoldersRequest) (*GetResourceHoldersResponse, error)
+	RegisterResourceHolder(context.Context, *RegisterResourceHolderRequest) (*Empty, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
 
@@ -62,8 +75,11 @@ type TrackerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTrackerServiceServer struct{}
 
-func (UnimplementedTrackerServiceServer) SendResourceRequest(context.Context, *ResourceRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendResourceRequest not implemented")
+func (UnimplementedTrackerServiceServer) GetResourceHolders(context.Context, *GetResourceHoldersRequest) (*GetResourceHoldersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResourceHolders not implemented")
+}
+func (UnimplementedTrackerServiceServer) RegisterResourceHolder(context.Context, *RegisterResourceHolderRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterResourceHolder not implemented")
 }
 func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
 func (UnimplementedTrackerServiceServer) testEmbeddedByValue()                        {}
@@ -86,20 +102,38 @@ func RegisterTrackerServiceServer(s grpc.ServiceRegistrar, srv TrackerServiceSer
 	s.RegisterService(&TrackerService_ServiceDesc, srv)
 }
 
-func _TrackerService_SendResourceRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceRequest)
+func _TrackerService_GetResourceHolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceHoldersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TrackerServiceServer).SendResourceRequest(ctx, in)
+		return srv.(TrackerServiceServer).GetResourceHolders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TrackerService_SendResourceRequest_FullMethodName,
+		FullMethod: TrackerService_GetResourceHolders_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TrackerServiceServer).SendResourceRequest(ctx, req.(*ResourceRequest))
+		return srv.(TrackerServiceServer).GetResourceHolders(ctx, req.(*GetResourceHoldersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TrackerService_RegisterResourceHolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterResourceHolderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).RegisterResourceHolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_RegisterResourceHolder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).RegisterResourceHolder(ctx, req.(*RegisterResourceHolderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +146,12 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*TrackerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendResourceRequest",
-			Handler:    _TrackerService_SendResourceRequest_Handler,
+			MethodName: "GetResourceHolders",
+			Handler:    _TrackerService_GetResourceHolders_Handler,
+		},
+		{
+			MethodName: "RegisterResourceHolder",
+			Handler:    _TrackerService_RegisterResourceHolder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

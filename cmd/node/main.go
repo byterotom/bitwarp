@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -16,10 +15,11 @@ func main() {
 
 	warp := warpgen.ReadWarpFile(os.Args[1])
 	if warp == nil {
-		log.Fatalf("invalid path")
+		log.Fatalf("invalid warp path")
 	}
 
 	n := node.NewNode(warp)
+	go n.RunNodeServer()
 
 	// initialize queue
 	node.QueueInit()
@@ -27,15 +27,11 @@ func main() {
 
 	// initialize tracker client
 	node.TrackerClientInit()
-	// go node.RunNodeServer()
 	defer node.StopNode()
 
 	// consume message
-	node.ConsumeMessage()
+	node.ConsumeMessage(n)
 
 	n.SendResourceRequest()
-
-	fmt.Println(n)
-
 	select {} // temporarily blocking
 }

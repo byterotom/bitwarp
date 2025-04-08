@@ -54,7 +54,7 @@ func StopQueue() {
 }
 
 // function to recieve message
-func ConsumeMessage() {
+func ConsumeMessage(n *Node) {
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
@@ -72,6 +72,7 @@ func ConsumeMessage() {
 	go func() {
 		for d := range msgs {
 			log.Printf(" [x] %s", d.Body)
+			n.SendResourceResponse(string(d.Body))
 		}
 	}()
 }
