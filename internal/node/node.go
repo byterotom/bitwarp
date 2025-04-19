@@ -45,13 +45,9 @@ func (n *Node) SendResourceRequest() {
 	log.Println(n.holders)
 }
 
-func (n *Node) SendResourceResponse(fileHash string) {
+func (n *Node) Register() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	if n.warp.FileHash != fileHash {
-		return
-	}
 
 	req := &pbtr.RegisterResourceHolderRequest{
 		FileHash: n.warp.FileHash,

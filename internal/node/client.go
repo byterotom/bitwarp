@@ -42,4 +42,10 @@ func TrackerClientInit() {
 func StopNode() {
 	trackerConn.Close()
 	nodeConn.Close()
+	// gracefull shutdown of node server yet to be added
+}
+
+func init() {
+	TrackerClientInit()
+	NodeClientInit()
 }

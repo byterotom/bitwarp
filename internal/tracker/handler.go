@@ -2,34 +2,29 @@ package tracker
 
 import (
 	"context"
-	"sync"
+	"log"
 
 	pbtr "github.com/Sp92535/internal/tracker/pb"
 )
 
-var mu sync.Mutex
-var db map[string]map[string]struct{} = make(map[string]map[string]struct{})
-
 func (p *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetResourceHoldersRequest) (*pbtr.GetResourceHoldersResponse, error) {
 
-	PublishRequest(req.FileHash)
-	var holders []string
-	for ip := range db[req.FileHash] {
-		holders = append(holders, ip)
+	ips, err := Rdb.SMembers(ctx, req.FileHash).Result()
+	if err != nil {
+		log.Printf("error fetching holders from redis: %v", err)
+		return nil, err
 	}
 
 	return &pbtr.GetResourceHoldersResponse{
-		Holders: holders,
+		Holders: ips,
 	}, nil
 }
 
-func (p *TrackerServer) RegisterResourceHolder(ctx context.Context, res *pbtr.RegisterResourceHolderRequest) (*pbtr.Empty, error) {
-	mu.Lock()
-	defer mu.Unlock()
-	if db[res.FileHash] == nil {
-		db[res.FileHash] = make(map[string]struct{})
+func (p *TrackerServer) RegisterResourceHolder(ctx context.Context, req *pbtr.RegisterResourceHolderRequest) (*pbtr.Empty, error) {
+	err := Rdb.SAdd(ctx, req.FileHash, req.Address).Err()
+	if err != nil {
+		log.Printf("error adding holder to redis: %v", err)
+		return nil, err
 	}
-	db[res.FileHash][res.Address] = struct{}{}
-
 	return &pbtr.Empty{}, nil
 }

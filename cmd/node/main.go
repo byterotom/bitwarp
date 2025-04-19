@@ -18,20 +18,18 @@ func main() {
 		log.Fatalf("invalid warp path")
 	}
 
+	// ready signal channel
+	ready := make(chan struct{})
+
 	n := node.NewNode(warp)
-	go n.RunNodeServer()
-
-	// initialize queue
-	node.QueueInit()
-	defer node.StopQueue()
-
-	// initialize tracker client
-	node.TrackerClientInit()
-	defer node.StopNode()
-
-	// consume message
-	node.ConsumeMessage(n)
-
+	go n.RunNodeServer(ready)
+	
+	<-ready
+	n.Register()
+	
 	n.SendResourceRequest()
+	
+	defer node.StopNode()
 	select {} // temporarily blocking
+
 }
