@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package node;
 
-option go_package = "internal/node/pb";
+option go_package = "proto/node/pb";
 
 
 service NodeService {

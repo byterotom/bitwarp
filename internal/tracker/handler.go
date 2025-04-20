@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	pbtr "github.com/Sp92535/internal/tracker/pb"
+	pbtr "github.com/Sp92535/proto/tracker/pb"
 )
 
 func (p *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetResourceHoldersRequest) (*pbtr.GetResourceHoldersResponse, error) {

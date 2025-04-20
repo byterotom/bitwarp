@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 type Warp struct {
@@ -24,20 +23,14 @@ const chunkSize = 1 << 20
 // function to create warp file
 func CreateWarpFile(filePath string) {
 
-	// get absolute file path
-	absFilePath, err := filepath.Abs(filePath)
-	if err != nil {
-		log.Fatalf("error getting absolute path: %v", err)
-	}
-
 	// getting file meta data
-	fileInfo, err := os.Stat(absFilePath)
+	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		log.Fatalf("error reading file stats: %v", err)
 	}
 
 	// open file pointer
-	file, err := os.Open(absFilePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
@@ -76,7 +69,7 @@ func CreateWarpFile(filePath string) {
 	outputDir := "storage/warp/"
 	os.MkdirAll(outputDir, os.ModePerm)
 	warpFilePath := outputDir + warp.FileName + ".json"
-	
+
 	warpFile, err := os.Create(warpFilePath)
 	if err != nil {
 		log.Fatalf("error creating warp file: %v", err)
@@ -90,23 +83,16 @@ func CreateWarpFile(filePath string) {
 // function to read warp file
 func ReadWarpFile(warpFilePath string) *Warp {
 
-	// get absolute file path
-	absFilePath, err := filepath.Abs(warpFilePath)
-	if err != nil {
-		log.Fatalf("error getting absolute path: %v", err)
-	}
-
-	// open warpfile in read mode
-	data, err := os.ReadFile(absFilePath)
+	data, err := os.ReadFile(warpFilePath)
 	if err != nil {
 		log.Fatalf("error reading warp file%v", err)
 	}
 
-	var warp *Warp
-
-	json.Unmarshal(data, &warp)
-
-	return warp
+	var warp Warp
+	if err := json.Unmarshal(data, &warp); err != nil {
+		log.Fatalf("error unmarshalling warp file: %v", err)
+	}
+	return &warp
 }
 
 func (w *Warp) MergeChunks() {

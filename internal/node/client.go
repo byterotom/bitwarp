@@ -3,8 +3,8 @@ package node
 import (
 	"log"
 
-	pbno "github.com/Sp92535/internal/node/pb"
-	pbtr "github.com/Sp92535/internal/tracker/pb"
+	pbno "github.com/Sp92535/proto/node/pb"
+	pbtr "github.com/Sp92535/proto/tracker/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -31,7 +31,7 @@ func TrackerClientInit() {
 
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	trackerConn, err := grpc.NewClient(":9999", opts)
+	trackerConn, err := grpc.NewClient("tracker:9999", opts)
 	if err != nil {
 		log.Fatalf("error connecting tracker :%v", err)
 	}

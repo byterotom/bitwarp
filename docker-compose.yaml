@@ -4,8 +4,34 @@ services:
     container_name: bitwarp-redis-server
     ports:
       - "6379:6379"
+    networks:
+      - bitwarp-net
     volumes:
-      - bitwarp_redis_data:/data
+      - bitwarp-redis-data:/data
+
+  tracker:
+    image: bitwarp-tracker
+    container_name: tracker
+    ports:
+      - "9999:9999"
+    networks:
+      - bitwarp-net
+    depends_on:
+      - redis
+
+  node:
+    image: bitwarp-node
+    networks:
+      - bitwarp-net
+    volumes:
+      - ./storage:/root/storage
+    depends_on:
+      - tracker
 
 volumes:
-  bitwarp_redis_data:
+  bitwarp-redis-data:
+
+
+networks:
+  bitwarp-net:
+    driver: bridge

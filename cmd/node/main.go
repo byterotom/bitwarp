@@ -15,7 +15,7 @@ func main() {
 
 	warp := warpgen.ReadWarpFile(os.Args[1])
 	if warp == nil {
-		log.Fatalf("invalid warp path")
+		log.Printf("invalid warp path")
 	}
 
 	// ready signal channel
@@ -23,12 +23,12 @@ func main() {
 
 	n := node.NewNode(warp)
 	go n.RunNodeServer(ready)
-	
+
 	<-ready
 	n.Register()
-	
+
 	n.SendResourceRequest()
-	
+
 	defer node.StopNode()
 	select {} // temporarily blocking
 

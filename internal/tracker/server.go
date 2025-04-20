@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pbtr "github.com/Sp92535/internal/tracker/pb"
+	pbtr "github.com/Sp92535/proto/tracker/pb"
 	"google.golang.org/grpc"
 )
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pbno "github.com/Sp92535/internal/node/pb"
+	pbno "github.com/Sp92535/proto/node/pb"
 	"google.golang.org/grpc"
 )
 

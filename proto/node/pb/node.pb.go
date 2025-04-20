@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.5
 // 	protoc        v3.21.12
-// source: proto/node.proto
+// source: proto/node/node.proto
 
 package pb
 
@@ -30,7 +30,7 @@ type Pong struct {
 
 func (x *Pong) Reset() {
 	*x = Pong{}
-	mi := &file_proto_node_proto_msgTypes[0]
+	mi := &file_proto_node_node_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +42,7 @@ func (x *Pong) String() string {
 func (*Pong) ProtoMessage() {}
 
 func (x *Pong) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_node_proto_msgTypes[0]
+	mi := &file_proto_node_node_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +55,7 @@ func (x *Pong) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pong.ProtoReflect.Descriptor instead.
 func (*Pong) Descriptor() ([]byte, []int) {
-	return file_proto_node_proto_rawDescGZIP(), []int{0}
+	return file_proto_node_node_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Pong) GetTime() string {
@@ -73,7 +73,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_node_proto_msgTypes[1]
+	mi := &file_proto_node_node_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -85,7 +85,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_node_proto_msgTypes[1]
+	mi := &file_proto_node_node_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -98,41 +98,41 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_node_proto_rawDescGZIP(), []int{1}
+	return file_proto_node_node_proto_rawDescGZIP(), []int{1}
 }
 
-var File_proto_node_proto protoreflect.FileDescriptor
+var File_proto_node_node_proto protoreflect.FileDescriptor
 
-var file_proto_node_proto_rawDesc = string([]byte{
-	0x0a, 0x10, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x04, 0x6e, 0x6f, 0x64, 0x65, 0x22, 0x1a, 0x0a, 0x04, 0x50, 0x6f, 0x6e, 0x67,
-	0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x74, 0x69, 0x6d, 0x65, 0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0x2e, 0x0a,
-	0x0b, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x1f, 0x0a, 0x04,
-	0x50, 0x69, 0x6e, 0x67, 0x12, 0x0b, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x45, 0x6d, 0x70, 0x74,
-	0x79, 0x1a, 0x0a, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x50, 0x6f, 0x6e, 0x67, 0x42, 0x12, 0x5a,
-	0x10, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x2f, 0x70,
-	0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+var file_proto_node_node_proto_rawDesc = string([]byte{
+	0x0a, 0x15, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6e, 0x6f, 0x64, 0x65, 0x2f, 0x6e, 0x6f, 0x64,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04, 0x6e, 0x6f, 0x64, 0x65, 0x22, 0x1a, 0x0a,
+	0x04, 0x50, 0x6f, 0x6e, 0x67, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x74, 0x69, 0x6d, 0x65, 0x22, 0x07, 0x0a, 0x05, 0x45, 0x6d, 0x70,
+	0x74, 0x79, 0x32, 0x2e, 0x0a, 0x0b, 0x4e, 0x6f, 0x64, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x1f, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x0b, 0x2e, 0x6e, 0x6f, 0x64, 0x65,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x0a, 0x2e, 0x6e, 0x6f, 0x64, 0x65, 0x2e, 0x50, 0x6f,
+	0x6e, 0x67, 0x42, 0x0f, 0x5a, 0x0d, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x6e, 0x6f, 0x64, 0x65,
+	0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 })
 
 var (
-	file_proto_node_proto_rawDescOnce sync.Once
-	file_proto_node_proto_rawDescData []byte
+	file_proto_node_node_proto_rawDescOnce sync.Once
+	file_proto_node_node_proto_rawDescData []byte
 )
 
-func file_proto_node_proto_rawDescGZIP() []byte {
-	file_proto_node_proto_rawDescOnce.Do(func() {
-		file_proto_node_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_node_proto_rawDesc), len(file_proto_node_proto_rawDesc)))
+func file_proto_node_node_proto_rawDescGZIP() []byte {
+	file_proto_node_node_proto_rawDescOnce.Do(func() {
+		file_proto_node_node_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_proto_node_node_proto_rawDesc), len(file_proto_node_node_proto_rawDesc)))
 	})
-	return file_proto_node_proto_rawDescData
+	return file_proto_node_node_proto_rawDescData
 }
 
-var file_proto_node_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_proto_node_proto_goTypes = []any{
+var file_proto_node_node_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_node_node_proto_goTypes = []any{
 	(*Pong)(nil),  // 0: node.Pong
 	(*Empty)(nil), // 1: node.Empty
 }
-var file_proto_node_proto_depIdxs = []int32{
+var file_proto_node_node_proto_depIdxs = []int32{
 	1, // 0: node.NodeService.Ping:input_type -> node.Empty
 	0, // 1: node.NodeService.Ping:output_type -> node.Pong
 	1, // [1:2] is the sub-list for method output_type
@@ -142,26 +142,26 @@ var file_proto_node_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_proto_node_proto_init() }
-func file_proto_node_proto_init() {
-	if File_proto_node_proto != nil {
+func init() { file_proto_node_node_proto_init() }
+func file_proto_node_node_proto_init() {
+	if File_proto_node_node_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_node_proto_rawDesc), len(file_proto_node_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_node_node_proto_rawDesc), len(file_proto_node_node_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_proto_node_proto_goTypes,
-		DependencyIndexes: file_proto_node_proto_depIdxs,
-		MessageInfos:      file_proto_node_proto_msgTypes,
+		GoTypes:           file_proto_node_node_proto_goTypes,
+		DependencyIndexes: file_proto_node_node_proto_depIdxs,
+		MessageInfos:      file_proto_node_node_proto_msgTypes,
 	}.Build()
-	File_proto_node_proto = out.File
-	file_proto_node_proto_goTypes = nil
-	file_proto_node_proto_depIdxs = nil
+	File_proto_node_node_proto = out.File
+	file_proto_node_node_proto_goTypes = nil
+	file_proto_node_node_proto_depIdxs = nil
 }

@@ -1,0 +1,17 @@
+{
+    "file_name": "ngo.pdf",
+    "file_size": 8311299,
+    "file_hash": "1f04b137844bf9721e3119d9599c4a3b48311f42dacad1da50892ea74a20418f",
+    "total_chunks": 8,
+    "chunk_size": 1048576,
+    "chunk": [
+        "b54e6dc0134a9ba07cb7620409d444c0620dc3bf45faad538f7d4c5d7721ec1c",
+        "e97f658f0c26e0496e9b144ef4aba72622984af8d2f0cc33981025c18d0f581b",
+        "643072e2d822b13346587bade68c653a817fbbd06cee3e65c59222189dca9da5",
+        "cb25accae715387a43cb35241452e1a89f9d9b2720b21eebbffcc17e97794888",
+        "1f9bf28bfd619a98939acbdad24df94b85e26fc40f29f1c27dfc6e4a10fbcfc1",
+        "7572dccfcc749f3bcddf5ddf94a16ae6c52477967f45b490b2bbade7d90ccc6f",
+        "bd5d3caf94719dbe4aefad49097bbe7f2c0de4477f8e5065deacd732f266ab40",
+        "e97ce697c87477ddcf921dbe0cfc1d3ce7818f4f045ceda914b990bf1c1e2d0b"
+    ]
+}

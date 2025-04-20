@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	pbtr "github.com/Sp92535/internal/tracker/pb"
+	pbtr "github.com/Sp92535/proto/tracker/pb"
 	"github.com/Sp92535/pkg"
 	"github.com/Sp92535/pkg/warpgen"
 )

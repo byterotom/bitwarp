@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package tracker;
 
-option go_package = "internal/tracker/pb";
+option go_package = "proto/tracker/pb";
 
 service TrackerService {
     rpc GetResourceHolders(GetResourceHoldersRequest) returns (GetResourceHoldersResponse);
