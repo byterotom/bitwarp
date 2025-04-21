@@ -28,6 +28,16 @@ services:
     depends_on:
       - tracker
 
+  seeder:
+    image: bitwarp-node
+    networks:
+      - bitwarp-net
+    volumes:
+      - ./storage:/root/storage
+    depends_on:
+      - tracker
+    command: [ "./node", "seed", "storage/warp/ngo.pdf.json" ]
+
 volumes:
   bitwarp-redis-data:
 

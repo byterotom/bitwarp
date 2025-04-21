@@ -14,4 +14,4 @@ FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /app/node .
 
-CMD ["./node","storage/warp/ngo.pdf.json"]
+CMD ["./node","get","storage/warp/ngo.pdf.json"]

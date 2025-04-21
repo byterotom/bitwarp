@@ -9,11 +9,18 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 || os.Args[1] == "" {
+
+	if len(os.Args) < 3 || (os.Args[1] != "seed" && os.Args[1] != "get") {
+		log.Fatalf("specify valid method")
+	}
+
+	if len(os.Args) < 3 || os.Args[2] == "" {
 		log.Fatalf("please specify warp file path")
 	}
 
-	warp := warpgen.ReadWarpFile(os.Args[1])
+	isSeeder := os.Args[1] == "seed"
+
+	warp := warpgen.ReadWarpFile(os.Args[2])
 	if warp == nil {
 		log.Printf("invalid warp path")
 	}
@@ -21,13 +28,15 @@ func main() {
 	// ready signal channel
 	ready := make(chan struct{})
 
-	n := node.NewNode(warp)
+	n := node.NewNode(warp, isSeeder)
 	go n.RunNodeServer(ready)
 
 	<-ready
-	n.Register()
+	go n.RegisterLoop()
 
-	n.SendResourceRequest()
+	if !isSeeder {
+		n.SendResourceRequest()
+	}
 
 	defer node.StopNode()
 	select {} // temporarily blocking
