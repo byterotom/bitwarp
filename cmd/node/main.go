@@ -29,7 +29,9 @@ func main() {
 	ready := make(chan struct{})
 
 	n := node.NewNode(warp, isSeeder)
-	go n.RunNodeServer(ready)
+	nodeServer := node.NewNodeServer(n)
+
+	go nodeServer.Run(ready)
 
 	<-ready
 	go n.RegisterLoop()
