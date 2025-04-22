@@ -36,9 +36,7 @@ func main() {
 	<-ready
 	go n.RegisterLoop()
 
-	if !isSeeder {
-		n.SendResourceRequest()
-	}
+	n.Download()
 
 	defer node.StopNode()
 	select {} // temporarily blocking

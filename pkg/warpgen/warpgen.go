@@ -137,8 +137,29 @@ func (w *Warp) MergeChunks() {
 	}
 }
 
-func (w *Warp) ReadChunk(filePath string, chunkNo int) {
+func (w *Warp) ReadChunk(chunkNo int) []byte {
 
+	filePath := "storage/downloads/" + w.FileName
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer file.Close()
+
+	offset := int64(chunkNo * w.ChunkSize)
+	buf := make([]byte, w.ChunkSize)
+
+	_, err = file.Seek(offset, 0)
+	if err != nil {
+		log.Fatalf("error seeking: %v", err)
+	}
+
+	n, err := file.Read(buf)
+	if err != nil && err != io.EOF {
+		log.Fatalf("error reading chunk: %v", err)
+	}
+
+	return buf[:n]
 }
 
 func CreateChunk(fileHash string, chunkNo int, data []byte) {
@@ -163,4 +184,8 @@ func CreateChunk(fileHash string, chunkNo int, data []byte) {
 func hash(data []byte) string {
 	hash := sha256.Sum256(data)
 	return fmt.Sprintf("%x", hash)
+}
+
+func Verify(computedHash string, data []byte) bool {
+	return hash(data) == computedHash
 }

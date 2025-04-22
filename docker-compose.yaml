@@ -6,8 +6,6 @@ services:
       - "6379:6379"
     networks:
       - bitwarp-net
-    volumes:
-      - bitwarp-redis-data:/data
 
   tracker:
     image: bitwarp-tracker
@@ -24,9 +22,10 @@ services:
     networks:
       - bitwarp-net
     volumes:
-      - ./storage:/root/storage
+      - ./storage/warp:/root/storage/warp
     depends_on:
       - tracker
+    command: [ "./node", "get", "storage/warp/ITL_demo.mp4.json" ]
 
   seeder:
     image: bitwarp-node
@@ -36,11 +35,7 @@ services:
       - ./storage:/root/storage
     depends_on:
       - tracker
-    command: [ "./node", "seed", "storage/warp/ngo.pdf.json" ]
-
-volumes:
-  bitwarp-redis-data:
-
+    command: [ "./node", "seed", "storage/warp/ITL_demo.mp4.json" ]
 
 networks:
   bitwarp-net:

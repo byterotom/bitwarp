@@ -7,11 +7,19 @@ option go_package = "proto/node/pb";
 
 service NodeService {
     rpc Ping(Empty) returns (Pong);
+    rpc GetResource(GetResourceRequest) returns (GetResourceResponse);
 }
 
 message Pong {
-    string time = 1;
+    string Time = 1;
 }
 
 
+message GetResourceRequest{
+    uint64 ChunkNo = 1;
+}
+message GetResourceResponse{
+    uint64 ChunkNo = 1;
+    bytes ChunkData = 2;   
+}
 message Empty {}

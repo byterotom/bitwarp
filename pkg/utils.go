@@ -3,6 +3,7 @@ package pkg
 import (
 	"log"
 	"net"
+	"time"
 )
 
 func GetLocalIp() string {
@@ -15,4 +16,10 @@ func GetLocalIp() string {
 	localAddress := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddress.IP.String()
+}
+
+func RTT[T any](f func()) float64 {
+	start := time.Now()
+	f()
+	return time.Since(start).Seconds()
 }

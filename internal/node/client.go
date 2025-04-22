@@ -13,17 +13,15 @@ import (
 var trackerClient pbtr.TrackerServiceClient
 var trackerConn *grpc.ClientConn
 
-var nodeClient pbno.NodeServiceClient
-var nodeConn *grpc.ClientConn
-
 // function to declare node client
-func NodeClientInit() {
-	nodeConn, err := grpc.NewClient(":6969", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NodeClient(addr string) (*grpc.ClientConn, pbno.NodeServiceClient) {
+	nodeConn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("ERROR :%v", err)
 	}
 
-	nodeClient = pbno.NewNodeServiceClient(nodeConn)
+	nodeClient := pbno.NewNodeServiceClient(nodeConn)
+	return nodeConn, nodeClient
 }
 
 // function to declare tracker client
@@ -41,11 +39,9 @@ func TrackerClientInit() {
 
 func StopNode() {
 	trackerConn.Close()
-	nodeConn.Close()
 	// gracefull shutdown of node server yet to be added
 }
 
 func init() {
 	TrackerClientInit()
-	NodeClientInit()
 }
