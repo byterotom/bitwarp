@@ -4,6 +4,8 @@ package node
 import (
 	"context"
 	"log"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -25,15 +27,18 @@ type Node struct {
 	isSeeder bool
 }
 
+// constructor function to create new node
 func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
 	var n Node
 	n = Node{
-		address:  pkg.GetLocalIp(),
-		warp:     warp,
-		isSeeder: isSeeder,
-		status:   make([]bool, warp.TotalChunks),
-		holders:  make([][]string, warp.TotalChunks),
+		address:   pkg.GetLocalIp(),
+		warp:      warp,
+		isSeeder:  isSeeder,
+		status:    make([]bool, warp.TotalChunks),
+		holders:   make([][]string, warp.TotalChunks),
+		available: 0,
 	}
+	// if is seeder set all status to true
 	if isSeeder {
 		for idx := range n.status {
 			n.status[idx] = true
@@ -42,7 +47,8 @@ func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
 	return &n
 }
 
-func (n *Node) SendResourceRequest() {
+// function to send holder request to tracker
+func (n *Node) SendHolderRequest() {
 	if n.isSeeder {
 		return
 	}
@@ -55,17 +61,22 @@ func (n *Node) SendResourceRequest() {
 	}
 	res, err := trackerClient.GetResourceHolders(ctx, req)
 	if err != nil {
-		log.Fatalf("could not invoke rpc: %v", err)
+		log.Printf("could not invoke rpc: %v", err)
+		return
 	}
 	for idx := range res.Holder {
 		n.holders[idx] = res.Holder[idx].Ips
 	}
-	log.Println(n.holders)
+	// log.Println(n.holders)
 }
 
-func (n *Node) RegisterLoop() {
-	ticker := time.NewTicker(30 * time.Second)
+const LOOP_INTERVAL = 10 * time.Second
 
+// function to loop register having resources to client and renew
+func (n *Node) RegisterLoop() {
+	ticker := time.NewTicker(LOOP_INTERVAL)
+
+	// initial register
 	n.Register()
 	for {
 		select {
@@ -75,6 +86,7 @@ func (n *Node) RegisterLoop() {
 	}
 }
 
+// function to register resource to tracker
 func (n *Node) Register() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -91,12 +103,14 @@ func (n *Node) Register() {
 	}
 }
 
-func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.WaitGroup) {
+// function to fetch chunk from a node
+func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.WaitGroup, workers chan struct{}) {
 	defer wg.Done()
-
+	// initialize node client
 	nodeConn, nodeClient := NodeClient(addr)
 	defer nodeConn.Close()
 
+	// can be replace with timeout
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -107,31 +121,44 @@ func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.Wait
 	chunk, err := nodeClient.GetResource(ctx, req)
 	if err != nil {
 		log.Printf("could not invoke rpc: %v", err)
+		return
 	}
 
+	// verify the chunk
 	if warpgen.Verify(n.warp.Chunk[chunkNo], chunk.ChunkData) {
+		// save once
 		once.Do(func() {
 			n.mu.Lock()
 			defer n.mu.Unlock()
 			warpgen.CreateChunk(n.warp.FileHash, chunkNo, chunk.ChunkData)
 			n.available++
 			n.status[chunkNo] = true
-			log.Printf("got chunk %d from %s.", chunkNo, addr)
+			log.Printf("got chunk %d from %s", chunkNo, addr)
 		})
 	}
 
+	// release worker
+	<-workers
 }
 
+
+// function to download the file
 func (n *Node) Download() {
+	// dont download if seeder
 	if n.isSeeder {
 		return
 	}
+	
+	// worker pool pattern to avoid memory exhaustion
+	workers := make(chan struct{}, 50)
 
-	for n.available != uint64(n.warp.TotalChunks) {
+	// loop until all chunks are found
+	for n.available < uint64(n.warp.TotalChunks) {
 
+		// waitgroup to wait until response
 		var wg sync.WaitGroup
 
-		n.SendResourceRequest()
+		n.SendHolderRequest()
 		ips := n.holders
 		for chunkNo := range ips {
 
@@ -139,15 +166,49 @@ func (n *Node) Download() {
 				continue
 			}
 
+			// sync once to get the fastest
 			var once sync.Once
 			for _, addr := range ips[chunkNo] {
 				wg.Add(1)
-				go n.GetChunk(addr, chunkNo, &once, &wg)
+				workers <- struct{}{}
+				go n.GetChunk(addr, chunkNo, &once, &wg, workers)
 			}
 		}
-
+		
 		wg.Wait()
 	}
-
+	
+	// merge all files once all chunks are here
 	n.warp.MergeChunks()
+}
+
+// function to update chunks status in case of failure
+func (n *Node) UpdateStatus() bool {
+	if n.isSeeder {
+		return true
+	}
+
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	chunkDir := "storage/temp/" + n.warp.FileHash + "/"
+	os.MkdirAll(chunkDir, os.ModePerm)
+
+	// iterate over chunk files
+	files, err := os.ReadDir(chunkDir)
+	if err != nil {
+		log.Printf("error reading chunk directory %v", err)
+	}
+
+	var flag bool = true
+	for _, file := range files {
+		filename := file.Name()
+		if idx, err := strconv.Atoi(filename); err == nil && !n.status[idx] {
+			n.status[idx] = true
+			n.available++
+			flag = false
+		}
+	}
+
+	return flag
 }

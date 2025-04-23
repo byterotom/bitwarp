@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	if len(os.Args) < 2 || os.Args[1] == "" {
 		log.Fatalf("please provide file path.")
 	}
 	filePath := os.Args[1]

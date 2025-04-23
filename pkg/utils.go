@@ -6,7 +6,9 @@ import (
 	"time"
 )
 
+// function to get local ip -> note: this is not public ip but the private ip in your network
 func GetLocalIp() string {
+	// dial google dns
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Fatalf("error getting local ip: %v", err)
@@ -18,6 +20,7 @@ func GetLocalIp() string {
 	return localAddress.IP.String()
 }
 
+// function to calculate round trip time of a function
 func RTT[T any](f func()) float64 {
 	start := time.Now()
 	f()

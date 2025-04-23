@@ -33,7 +33,7 @@ func (nodeServer *NodeServer) Run(ready chan struct{}) {
 	serverPort := listner.Addr().(*net.TCPAddr).Port
 
 	nodeServer.address = nodeServer.address + ":" + fmt.Sprint(serverPort)
-	log.Printf("GRPC server running on %d...", serverPort)
+	log.Printf("grpc node server running on %d...", serverPort)
 	close(ready)
 	if err := grpcServer.Serve(listner); err != nil {
 		log.Fatalf("failed to serve: %v", err)

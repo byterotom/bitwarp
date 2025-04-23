@@ -25,7 +25,7 @@ services:
       - ./storage/warp:/root/storage/warp
     depends_on:
       - tracker
-    command: [ "./node", "get", "storage/warp/ITL_demo.mp4.json" ]
+    command: [ "./node", "get", "storage/warp/ngo.pdf.json" ]
 
   seeder:
     image: bitwarp-node
@@ -35,7 +35,7 @@ services:
       - ./storage:/root/storage
     depends_on:
       - tracker
-    command: [ "./node", "seed", "storage/warp/ITL_demo.mp4.json" ]
+    command: [ "./node", "seed", "storage/warp/ngo.pdf.json" ]
 
 networks:
   bitwarp-net:

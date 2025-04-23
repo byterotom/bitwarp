@@ -83,11 +83,13 @@ func CreateWarpFile(filePath string) {
 // function to read warp file
 func ReadWarpFile(warpFilePath string) *Warp {
 
+	// load file in memory
 	data, err := os.ReadFile(warpFilePath)
 	if err != nil {
 		log.Fatalf("error reading warp file%v", err)
 	}
 
+	// unmarshal json to warp
 	var warp Warp
 	if err := json.Unmarshal(data, &warp); err != nil {
 		log.Fatalf("error unmarshalling warp file: %v", err)
@@ -95,6 +97,7 @@ func ReadWarpFile(warpFilePath string) *Warp {
 	return &warp
 }
 
+// function to merge downloaded chunks
 func (w *Warp) MergeChunks() {
 
 	chunkDir := "storage/temp/" + w.FileHash + "/"
@@ -109,18 +112,21 @@ func (w *Warp) MergeChunks() {
 
 	outFile, err := os.Create(filePath)
 	if err != nil {
-		log.Fatalf("error opening output file %v", err)
+		log.Fatalf("error opening output file: %v", err)
 	}
 	defer outFile.Close()
 
+	// copy all chunks to a output file
 	for i := range w.TotalChunks {
+
+		// log.Printf("merging %d", i)
 
 		chunkPath := chunkDir + fmt.Sprint(i)
 
 		inFile, err := os.Open(chunkPath)
 		if err != nil {
 			os.Remove(filePath)
-			log.Fatalf("error merging: %v", err)
+			log.Fatalf("error opening chunk file: %v", err)
 		}
 
 		_, err = io.Copy(outFile, inFile)
@@ -131,37 +137,57 @@ func (w *Warp) MergeChunks() {
 		}
 	}
 
+	// delete all chunks after successfull merge
 	err = os.RemoveAll(chunkDir)
 	if err != nil {
 		log.Fatalf("error removing chunks: %v", err)
 	}
+
+	log.Printf("file downloaded successfully at %s", filePath)
 }
 
-func (w *Warp) ReadChunk(chunkNo int) []byte {
+// function to read chunk to send
+func (w *Warp) ReadChunk(chunkNo int, isSeeder bool) ([]byte, error) {
 
+	// read entire downloaded chunk from /temp if not a seeder
+	if !isSeeder {
+		filePath := fmt.Sprintf("storage/temp/%s/%d", w.FileHash, chunkNo)
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			log.Printf("error reading chunk %v", err)
+			return []byte{}, err
+		}
+		return data, nil
+	}
+
+	// read chunk directly from file if seeder
+	buf := make([]byte, w.ChunkSize)
 	filePath := "storage/downloads/" + w.FileName
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		log.Printf("error opening file: %v", err)
+		return []byte{}, err
 	}
 	defer file.Close()
 
 	offset := int64(chunkNo * w.ChunkSize)
-	buf := make([]byte, w.ChunkSize)
 
 	_, err = file.Seek(offset, 0)
 	if err != nil {
-		log.Fatalf("error seeking: %v", err)
+		log.Printf("error seeking: %v", err)
+		return []byte{}, err
 	}
 
 	n, err := file.Read(buf)
 	if err != nil && err != io.EOF {
-		log.Fatalf("error reading chunk: %v", err)
+		log.Printf("error reading chunk: %v", err)
+		return []byte{}, err
 	}
 
-	return buf[:n]
+	return buf[:n], nil
 }
 
+// function to create(write) chunk in temp
 func CreateChunk(fileHash string, chunkNo int, data []byte) {
 
 	chunkDir := "storage/temp/" + fileHash + "/"
@@ -186,6 +212,7 @@ func hash(data []byte) string {
 	return fmt.Sprintf("%x", hash)
 }
 
+// function to verify chunk hash
 func Verify(computedHash string, data []byte) bool {
 	return hash(data) == computedHash
 }

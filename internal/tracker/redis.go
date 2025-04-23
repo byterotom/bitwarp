@@ -2,8 +2,15 @@
 package tracker
 
 import (
+	"context"
+	"fmt"
+	"time"
+
 	"github.com/redis/go-redis/v9"
 )
+
+// time to live for each entry
+const TTL = 10 * time.Second
 
 // function to initialize redis client to interact with redis
 func RedisInit() *redis.Client {
@@ -13,11 +20,8 @@ func RedisInit() *redis.Client {
 	return rdb
 }
 
-// // function to load lua scripts as a redis script
-// func LoadScript(filename string) *redis.Script {
-// 	data, err := os.ReadFile(filename)
-// 	if err != nil {
-// 		log.Fatalf("error loading lua scripts %v", err)
-// 	}
-// 	return redis.NewScript(string(data))
-// }
+// function to remove expired members
+func RemoveExpired(key string, ctx context.Context) {
+	now := float64(time.Now().Unix())
+	Rdb.ZRemRangeByScore(ctx, key, "0", fmt.Sprintf("%f", now))
+}

@@ -9,36 +9,45 @@ import (
 )
 
 func main() {
-
+	// reject if invalid method
 	if len(os.Args) < 3 || (os.Args[1] != "seed" && os.Args[1] != "get") {
 		log.Fatalf("specify valid method")
 	}
 
+	// reject if no warp file
 	if len(os.Args) < 3 || os.Args[2] == "" {
 		log.Fatalf("please specify warp file path")
 	}
 
 	isSeeder := os.Args[1] == "seed"
 
+	// read warp file to warp
 	warp := warpgen.ReadWarpFile(os.Args[2])
 	if warp == nil {
 		log.Printf("invalid warp path")
 	}
 
-	// ready signal channel
+	// ready signal channel to start register loop only when port number is appended to address
 	ready := make(chan struct{})
 
+	// intialize new node and node server
 	n := node.NewNode(warp, isSeeder)
 	nodeServer := node.NewNodeServer(n)
+	defer node.StopNode()
 
+	// run the node server
 	go nodeServer.Run(ready)
 
+	
+	// start register loop once ready
 	<-ready
+	n.UpdateStatus() // this can update status in case of partial download
 	go n.RegisterLoop()
 
+	// seeder doesnt download but will gracefully shutdown on CTRL+C
+	if isSeeder {
+		select {} // temporarily blocking
+	}
+
 	n.Download()
-
-	defer node.StopNode()
-	select {} // temporarily blocking
-
 }
