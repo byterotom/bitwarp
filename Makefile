@@ -1,4 +1,8 @@
-.PHONY: build proto
+.PHONY: build proto install
+
+install:
+	chmod +x install-go.sh
+	./install.sh
 
 build:
 	docker build -t bitwarp-node:latest -f Dockerfile.node .
