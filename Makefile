@@ -1,7 +1,7 @@
 .PHONY: build proto install
 
 install:
-	chmod +x install-go.sh
+	chmod +x install.sh
 	./install.sh
 
 build:
