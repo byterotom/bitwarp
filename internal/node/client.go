@@ -29,7 +29,7 @@ func TrackerClientInit() {
 	var err error
 	opts := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	trackerConn, err = grpc.NewClient("tracker:9999", opts)
+	trackerConn, err = grpc.NewClient("localhost:9999", opts)
 	if err != nil {
 		log.Fatalf("error connecting tracker :%v", err)
 	}

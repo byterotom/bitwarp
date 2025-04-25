@@ -7,35 +7,35 @@ services:
     networks:
       - bitwarp-net
 
-  tracker:
-    image: bitwarp-tracker
-    container_name: tracker
-    ports:
-      - "9999:9999"
-    networks:
-      - bitwarp-net
-    depends_on:
-      - redis
+  # tracker:
+  #   image: bitwarp-tracker
+  #   container_name: tracker
+  #   ports:
+  #     - "9999:9999"
+  #   networks:
+  #     - bitwarp-net
+  #   depends_on:
+  #     - redis
 
-  node:
-    image: bitwarp-node
-    networks:
-      - bitwarp-net
-    volumes:
-      - ./storage/warp:/root/storage/warp
-    depends_on:
-      - tracker
-    command: [ "./node", "get", "storage/warp/ngo.pdf.json" ]
+  # node:
+  #   image: bitwarp-node
+  #   networks:
+  #     - bitwarp-net
+  #   volumes:
+  #     - ./storage/warp:/root/storage/warp
+  #   depends_on:
+  #     - tracker
+  #   command: [ "./node", "get", "storage/warp/ngo.pdf.json" ]
 
-  seeder:
-    image: bitwarp-node
-    networks:
-      - bitwarp-net
-    volumes:
-      - ./storage:/root/storage
-    depends_on:
-      - tracker
-    command: [ "./node", "seed", "storage/warp/ngo.pdf.json" ]
+  # seeder:
+  #   image: bitwarp-node
+  #   networks:
+  #     - bitwarp-net
+  #   volumes:
+  #     - ./storage:/root/storage
+  #   depends_on:
+  #     - tracker
+  #   command: [ "./node", "seed", "storage/warp/ngo.pdf.json" ]
 
 networks:
   bitwarp-net:

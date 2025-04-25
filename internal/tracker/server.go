@@ -22,7 +22,7 @@ func NewTrackerServer() *TrackerServer {
 // function to run tracker server
 func RunTrackerServer() {
 
-	listner, err := net.Listen("tcp", ":"+fmt.Sprint(PORT))
+	listner, err := net.Listen("tcp", "0.0.0.0:"+fmt.Sprint(PORT))
 	if err != nil {
 		log.Fatalf("error initializing listner: %v", err)
 	}
