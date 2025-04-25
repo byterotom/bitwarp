@@ -15,7 +15,7 @@ const TTL = 10 * time.Second
 // function to initialize redis client to interact with redis
 func RedisInit() *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
-		Addr: ":6379",
+		Addr: "redis:6379",
 	})
 	return rdb
 }

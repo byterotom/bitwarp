@@ -41,7 +41,7 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 		// donot append if limit reached -> note: not exiting due to remaining initialization of ips
 		if currentSize < LIMIT {
 			// append random number of ips from 1-5
-			res.Holder[chunkNo].Ips, err = Rdb.ZRandMember(ctx, key, random(4)).Result()
+			res.Holder[chunkNo].Ips, err = Rdb.ZRandMember(ctx, key, random(3)).Result()
 			currentSize += len(res.Holder[chunkNo].Ips)
 		}
 

@@ -21,7 +21,7 @@ func GetLocalIp() string {
 }
 
 // function to calculate round trip time of a function
-func RTT[T any](f func()) float64 {
+func RTT(f func()) float64 {
 	start := time.Now()
 	f()
 	return time.Since(start).Seconds()

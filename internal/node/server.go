@@ -21,7 +21,7 @@ func NewNodeServer(node *Node) *NodeServer {
 
 // function to run node server
 func (nodeServer *NodeServer) Run(ready chan struct{}) {
-	listner, err := net.Listen("tcp", "0.0.0.0:6969") // dynamic port for os to choose available one
+	listner, err := net.Listen("tcp", "0.0.0.0:6969") 
 	if err != nil {
 		log.Fatalf("error initializing listner: %v", err)
 	}

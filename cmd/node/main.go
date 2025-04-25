@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Sp92535/internal/node"
+	"github.com/Sp92535/pkg"
 	"github.com/Sp92535/pkg/warpgen"
 )
 
@@ -38,7 +39,6 @@ func main() {
 	// run the node server
 	go nodeServer.Run(ready)
 
-	
 	// start register loop once ready
 	<-ready
 	n.UpdateStatus() // this can update status in case of partial download
@@ -48,6 +48,6 @@ func main() {
 	if isSeeder {
 		select {} // temporarily blocking
 	}
-
-	n.Download()
+	t := pkg.RTT(n.Download)
+	log.Printf("Downloaded in %f seconds", t)
 }

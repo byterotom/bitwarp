@@ -13,6 +13,7 @@ import (
 	"github.com/Sp92535/pkg/warpgen"
 	pbno "github.com/Sp92535/proto/node/pb"
 	pbtr "github.com/Sp92535/proto/tracker/pb"
+	"google.golang.org/grpc"
 )
 
 type Node struct {
@@ -23,7 +24,9 @@ type Node struct {
 	available uint64
 	status    []bool
 
-	holders  [][]string
+	holders     [][]string
+	holdersConn map[string](*grpc.ClientConn)
+
 	isSeeder bool
 }
 
@@ -31,12 +34,13 @@ type Node struct {
 func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
 	var n Node
 	n = Node{
-		address:   pkg.GetLocalIp(),
-		warp:      warp,
-		isSeeder:  isSeeder,
-		status:    make([]bool, warp.TotalChunks),
-		holders:   make([][]string, warp.TotalChunks),
-		available: 0,
+		address:     pkg.GetLocalIp(),
+		warp:        warp,
+		isSeeder:    isSeeder,
+		status:      make([]bool, warp.TotalChunks),
+		holders:     make([][]string, warp.TotalChunks),
+		available:   0,
+		holdersConn: make(map[string]*grpc.ClientConn),
 	}
 	// if is seeder set all status to true
 	if isSeeder {
@@ -66,7 +70,13 @@ func (n *Node) SendHolderRequest() {
 	}
 	for idx := range res.Holder {
 		n.holders[idx] = res.Holder[idx].Ips
+		for _, addr := range n.holders[idx] {
+			if _, ok := n.holdersConn[addr]; !ok {
+				n.holdersConn[addr] = NodeConn(addr)
+			}
+		}
 	}
+
 	// log.Println(n.holders)
 }
 
@@ -99,16 +109,16 @@ func (n *Node) Register() {
 
 	_, err := trackerClient.RegisterResourceHolder(ctx, req)
 	if err != nil {
-		log.Fatalf("could not invoke rpc: %v", err)
+		log.Printf("could not invoke rpc: %v", err)
 	}
 }
 
 // function to fetch chunk from a node
-func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.WaitGroup, workers chan struct{}) {
+func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	// initialize node client
-	nodeConn, nodeClient := NodeClient(addr)
-	defer nodeConn.Close()
+	nodeClient := pbno.NewNodeServiceClient(n.holdersConn[addr])
 
 	// can be replace with timeout
 	ctx, cancel := context.WithCancel(context.Background())
@@ -136,11 +146,7 @@ func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.Wait
 			log.Printf("got chunk %d from %s", chunkNo, addr)
 		})
 	}
-
-	// release worker
-	<-workers
 }
-
 
 // function to download the file
 func (n *Node) Download() {
@@ -148,9 +154,6 @@ func (n *Node) Download() {
 	if n.isSeeder {
 		return
 	}
-	
-	// worker pool pattern to avoid memory exhaustion
-	workers := make(chan struct{}, 50)
 
 	// loop until all chunks are found
 	for n.available < uint64(n.warp.TotalChunks) {
@@ -170,16 +173,23 @@ func (n *Node) Download() {
 			var once sync.Once
 			for _, addr := range ips[chunkNo] {
 				wg.Add(1)
-				workers <- struct{}{}
-				go n.GetChunk(addr, chunkNo, &once, &wg, workers)
+				go n.GetChunk(addr, chunkNo, &once, &wg)
 			}
 		}
-		
 		wg.Wait()
+		n.CloseAllConn()
 	}
-	
+
 	// merge all files once all chunks are here
 	n.warp.MergeChunks()
+}
+
+// function to close all connections
+func (n *Node) CloseAllConn() {
+	for addr, conn := range n.holdersConn {
+		conn.Close()
+		delete(n.holdersConn, addr)
+	}
 }
 
 // function to update chunks status in case of failure
