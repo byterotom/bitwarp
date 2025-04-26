@@ -14,6 +14,7 @@ import (
 	pbno "github.com/Sp92535/proto/node/pb"
 	pbtr "github.com/Sp92535/proto/tracker/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 )
 
 type Node struct {
@@ -71,7 +72,7 @@ func (n *Node) SendHolderRequest() {
 	for idx := range res.Holder {
 		n.holders[idx] = res.Holder[idx].Ips
 		for _, addr := range n.holders[idx] {
-			if _, ok := n.holdersConn[addr]; !ok {
+			if conn, ok := n.holdersConn[addr]; !ok || conn.GetState() == connectivity.Shutdown {
 				n.holdersConn[addr] = NodeConn(addr)
 			}
 		}
@@ -186,9 +187,8 @@ func (n *Node) Download() {
 
 // function to close all connections
 func (n *Node) CloseAllConn() {
-	for addr, conn := range n.holdersConn {
+	for _, conn := range n.holdersConn {
 		conn.Close()
-		delete(n.holdersConn, addr)
 	}
 }
 
