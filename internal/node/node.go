@@ -14,7 +14,6 @@ import (
 	pbno "github.com/Sp92535/proto/node/pb"
 	pbtr "github.com/Sp92535/proto/tracker/pb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
 )
 
 type Node struct {
@@ -22,10 +21,10 @@ type Node struct {
 	warp    *warpgen.Warp
 
 	mu        sync.Mutex
-	available uint64
 	status    []bool
+	available uint64
 
-	holders     [][]string
+	holders     map[int64][]string
 	holdersConn map[string](*grpc.ClientConn)
 
 	isSeeder bool
@@ -39,7 +38,7 @@ func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
 		warp:        warp,
 		isSeeder:    isSeeder,
 		status:      make([]bool, warp.TotalChunks),
-		holders:     make([][]string, warp.TotalChunks),
+		holders:     make(map[int64][]string),
 		available:   0,
 		holdersConn: make(map[string]*grpc.ClientConn),
 	}
@@ -53,7 +52,7 @@ func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
 }
 
 // function to send holder request to tracker
-func (n *Node) SendHolderRequest() {
+func (n *Node) sendHolderRequest() {
 	if n.isSeeder {
 		return
 	}
@@ -69,10 +68,10 @@ func (n *Node) SendHolderRequest() {
 		log.Printf("could not invoke rpc: %v", err)
 		return
 	}
-	for idx := range res.Holder {
-		n.holders[idx] = res.Holder[idx].Ips
-		for _, addr := range n.holders[idx] {
-			if conn, ok := n.holdersConn[addr]; !ok || conn.GetState() == connectivity.Shutdown {
+	for key := range res.Holder {
+		n.holders[key] = res.Holder[key].Ips
+		for _, addr := range n.holders[key] {
+			if _, ok := n.holdersConn[addr]; !ok {
 				n.holdersConn[addr] = NodeConn(addr)
 			}
 		}
@@ -88,17 +87,17 @@ func (n *Node) RegisterLoop() {
 	ticker := time.NewTicker(LOOP_INTERVAL)
 
 	// initial register
-	n.Register()
+	n.register()
 	for {
 		select {
 		case <-ticker.C:
-			n.Register()
+			n.register()
 		}
 	}
 }
 
 // function to register resource to tracker
-func (n *Node) Register() {
+func (n *Node) register() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -115,15 +114,11 @@ func (n *Node) Register() {
 }
 
 // function to fetch chunk from a node
-func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.WaitGroup) {
+func (n *Node) getChunk(ctx context.Context, cancel context.CancelFunc, addr string, chunkNo int64, once *sync.Once, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	// initialize node client
 	nodeClient := pbno.NewNodeServiceClient(n.holdersConn[addr])
-
-	// can be replace with timeout
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	req := &pbno.GetResourceRequest{
 		ChunkNo: uint64(chunkNo),
@@ -145,10 +140,14 @@ func (n *Node) GetChunk(addr string, chunkNo int, once *sync.Once, wg *sync.Wait
 			n.available++
 			n.status[chunkNo] = true
 			log.Printf("got chunk %d from %s", chunkNo, addr)
+			cancel()
 		})
 	}
 }
 
+
+const TIMEOUT = 10*time.Second
+const WORKERS = 50
 // function to download the file
 func (n *Node) Download() {
 	// dont download if seeder
@@ -161,8 +160,9 @@ func (n *Node) Download() {
 
 		// waitgroup to wait until response
 		var wg sync.WaitGroup
+		worker := make(chan struct{}, WORKERS)
 
-		n.SendHolderRequest()
+		n.sendHolderRequest()
 		ips := n.holders
 		for chunkNo := range ips {
 
@@ -171,14 +171,31 @@ func (n *Node) Download() {
 			}
 
 			// sync once to get the fastest
+			ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
+
 			var once sync.Once
+			var innerWg sync.WaitGroup
+
 			for _, addr := range ips[chunkNo] {
-				wg.Add(1)
-				go n.GetChunk(addr, chunkNo, &once, &wg)
+				innerWg.Add(1)
+				go n.getChunk(ctx, cancel, addr, chunkNo, &once, &innerWg)
 			}
+
+			worker <- struct{}{}
+			wg.Add(1)
+			go func() {
+				defer func() {
+					<-worker
+					wg.Done()
+					cancel()
+				}()
+				innerWg.Wait()
+			}()
+
 		}
 		wg.Wait()
-		n.CloseAllConn()
+		close(worker)
+		n.closeAllConn()
 	}
 
 	// merge all files once all chunks are here
@@ -186,9 +203,10 @@ func (n *Node) Download() {
 }
 
 // function to close all connections
-func (n *Node) CloseAllConn() {
-	for _, conn := range n.holdersConn {
+func (n *Node) closeAllConn() {
+	for addr, conn := range n.holdersConn {
 		conn.Close()
+		delete(n.holdersConn, addr)
 	}
 }
 

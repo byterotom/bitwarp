@@ -14,7 +14,6 @@ import (
 // ip limit to send
 const LIMIT = 50
 
-
 // implemented function to return resource holders of a particular file
 func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetResourceHoldersRequest) (*pbtr.GetResourceHoldersResponse, error) {
 
@@ -22,10 +21,13 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 	var err error
 	var currentSize int = 0
 
-	res.Holder = make([]*pbtr.HolderRow, len(req.Status))
-	
+	res.Holder = make(map[int64]*pbtr.HolderRow)
+
 	// get ips for only the chunks that client doesn't have
 	for chunkNo, ok := range req.Status {
+		if currentSize >= LIMIT {
+			break
+		}
 		if ok {
 			continue
 		}
@@ -33,16 +35,16 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 		// construct key
 		key := fmt.Sprintf("%s:%d", req.FileHash, chunkNo)
 
-		res.Holder[chunkNo] = &pbtr.HolderRow{}
-
 		// remove expired members before giving new ips
 		RemoveExpired(key, ctx)
 
 		// donot append if limit reached -> note: not exiting due to remaining initialization of ips
-		if currentSize < LIMIT {
+		sample := random(3)
+		if sample > 0 {
 			// append random number of ips from 1-5
-			res.Holder[chunkNo].Ips, err = Rdb.ZRandMember(ctx, key, random(3)).Result()
-			currentSize += len(res.Holder[chunkNo].Ips)
+			res.Holder[int64(chunkNo)] = &pbtr.HolderRow{}
+			res.Holder[int64(chunkNo)].Ips, err = Rdb.ZRandMember(ctx, key, sample).Result()
+			currentSize += len(res.Holder[int64(chunkNo)].Ips)
 		}
 
 		if err != nil {

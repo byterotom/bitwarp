@@ -21,7 +21,7 @@ message RegisterResourceHolderRequest{
 }
 
 message GetResourceHoldersResponse{
-    repeated HolderRow Holder = 2;
+    map<int64,HolderRow> Holder = 1;
 }
 message HolderRow {
     repeated string Ips = 1;

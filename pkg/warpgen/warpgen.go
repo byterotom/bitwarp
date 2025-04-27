@@ -1,6 +1,7 @@
 package warpgen
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,7 @@ type Warp struct {
 	Chunk       []string `json:"chunk"`
 }
 
-const chunkSize = 1 << 20
+const CHUNK_SIZE = 1 << 20
 
 // function to create warp file
 func CreateWarpFile(filePath string) {
@@ -40,11 +41,11 @@ func CreateWarpFile(filePath string) {
 	warp := &Warp{
 		FileName:  fileInfo.Name(),
 		FileSize:  int(fileInfo.Size()),
-		ChunkSize: chunkSize,
+		ChunkSize: CHUNK_SIZE,
 	}
 
 	// stream reading from file
-	buffer := make([]byte, chunkSize)
+	buffer := make([]byte, CHUNK_SIZE)
 	for {
 		n, err := file.Read(buffer)
 		if err == io.EOF {
@@ -116,6 +117,9 @@ func (w *Warp) MergeChunks() {
 	}
 	defer outFile.Close()
 
+	writer := bufio.NewWriter(outFile)
+	defer writer.Flush()
+
 	// copy all chunks to a output file
 	for i := range w.TotalChunks {
 
@@ -129,12 +133,15 @@ func (w *Warp) MergeChunks() {
 			log.Fatalf("error opening chunk file: %v", err)
 		}
 
-		_, err = io.Copy(outFile, inFile)
-		inFile.Close()
+		reader := bufio.NewReader(inFile)
+
+		_, err = io.Copy(writer, reader)
+
 		if err != nil {
 			os.Remove(filePath)
 			log.Fatalf("error merging: %v", err)
 		}
+
 	}
 
 	// delete all chunks after successfull merge
@@ -171,14 +178,9 @@ func (w *Warp) ReadChunk(chunkNo int, isSeeder bool) ([]byte, error) {
 	defer file.Close()
 
 	offset := int64(chunkNo * w.ChunkSize)
+	section := io.NewSectionReader(file, offset, int64(w.ChunkSize))
 
-	_, err = file.Seek(offset, 0)
-	if err != nil {
-		log.Printf("error seeking: %v", err)
-		return []byte{}, err
-	}
-
-	n, err := file.Read(buf)
+	n, err := section.Read(buf)
 	if err != nil && err != io.EOF {
 		log.Printf("error reading chunk: %v", err)
 		return []byte{}, err
@@ -188,7 +190,7 @@ func (w *Warp) ReadChunk(chunkNo int, isSeeder bool) ([]byte, error) {
 }
 
 // function to create(write) chunk in temp
-func CreateChunk(fileHash string, chunkNo int, data []byte) {
+func CreateChunk(fileHash string, chunkNo int64, data []byte) {
 
 	chunkDir := "storage/temp/" + fileHash + "/"
 	chunkPath := chunkDir + fmt.Sprint(chunkNo)
