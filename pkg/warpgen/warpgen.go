@@ -100,6 +100,7 @@ func ReadWarpFile(warpFilePath string) *Warp {
 
 // function to merge downloaded chunks
 func (w *Warp) MergeChunks() {
+	log.Printf("Merging....")
 
 	chunkDir := "storage/temp/" + w.FileHash + "/"
 	fileDir := "storage/downloads/"

@@ -9,30 +9,38 @@ services:
 
   tracker:
     image: bitwarp-tracker
-    container_name: tracker
-    ports:
-      - "9999:9999"
     networks:
       - bitwarp-net
     depends_on:
       - redis
 
-  node:
-    image: bitwarp-node
+  nginx:
+    image: nginx:latest
+    container_name: tracker-lb
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./tracker-lb.conf:/etc/nginx/nginx.conf
     networks:
       - bitwarp-net
+    depends_on:
+      - tracker
+  node:
+    image: bitwarp-node
     volumes:
       - ./storage/warp:/root/storage/warp
+    networks:
+      - bitwarp-net
     depends_on:
       - tracker
     command: [ "./node", "get", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
 
   seeder:
     image: bitwarp-node
-    networks:
-      - bitwarp-net
     volumes:
       - ./storage:/root/storage
+    networks:
+      - bitwarp-net
     depends_on:
       - tracker
     command: [ "./node", "seed", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
