@@ -18,18 +18,14 @@ const LIMIT = 50
 func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetResourceHoldersRequest) (*pbtr.GetResourceHoldersResponse, error) {
 
 	var res pbtr.GetResourceHoldersResponse
-	var err error
 	var currentSize int = 0
 
-	res.Holder = make(map[int64]*pbtr.HolderRow)
+	res.Holder = make(map[uint64]*pbtr.HolderRow)
 
 	// get ips for only the chunks that client doesn't have
-	for chunkNo, ok := range req.Status {
+	for _, chunkNo := range req.Need {
 		if currentSize >= LIMIT {
 			break
-		}
-		if ok {
-			continue
 		}
 
 		// construct key
@@ -40,11 +36,12 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 
 		// donot append if limit reached -> note: not exiting due to remaining initialization of ips
 		sample := random(3)
-		if sample > 0 {
+		arr, err := Rdb.ZRandMember(ctx, key, sample).Result()
+		if len(arr) > 0 {
 			// append random number of ips from 1-5
-			res.Holder[int64(chunkNo)] = &pbtr.HolderRow{}
-			res.Holder[int64(chunkNo)].Ips, err = Rdb.ZRandMember(ctx, key, sample).Result()
-			currentSize += len(res.Holder[int64(chunkNo)].Ips)
+			res.Holder[chunkNo] = &pbtr.HolderRow{}
+			res.Holder[chunkNo].Ips = arr
+			currentSize += len(res.Holder[chunkNo].Ips)
 		}
 
 		if err != nil {

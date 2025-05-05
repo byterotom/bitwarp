@@ -10,7 +10,7 @@ import (
 )
 
 // time to live for each entry
-const TTL = 10 * time.Second
+const TTL = 50 * time.Second
 
 // function to initialize redis client to interact with redis
 func RedisInit() *redis.Client {

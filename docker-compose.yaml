@@ -32,7 +32,7 @@ services:
     networks:
       - bitwarp-net
     depends_on:
-      - tracker
+      - nginx
     command: [ "./node", "get", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
 
   seeder:
@@ -42,7 +42,7 @@ services:
     networks:
       - bitwarp-net
     depends_on:
-      - tracker
+      - nginx
     command: [ "./node", "seed", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
 
 networks:

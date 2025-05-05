@@ -42,12 +42,19 @@ func main() {
 	// start register loop once ready
 	<-ready
 	n.UpdateStatus() // this can update status in case of partial download
-	go n.RegisterLoop()
 
 	// seeder doesnt download but will gracefully shutdown on CTRL+C
 	if isSeeder {
+		go n.RegisterLoop()
 		select {} // temporarily blocking
 	}
-	t := pkg.RTT(n.Download)
-	log.Printf("Downloaded in %f seconds", t)
+	
+	d := pkg.RTT(n.Download)
+	log.Printf("Downloaded in %f seconds", d)
+
+	// merge all files once all chunks are here
+	m := pkg.RTT(warp.MergeChunks)
+	log.Printf("Merged in %f seconds", m)
+	
+
 }

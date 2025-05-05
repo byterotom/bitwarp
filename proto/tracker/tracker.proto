@@ -11,7 +11,7 @@ service TrackerService {
 
 message GetResourceHoldersRequest{
     string FileHash = 1;
-    repeated bool Status = 2;
+    repeated uint64 Need = 2;
 }
 
 message RegisterResourceHolderRequest{
@@ -21,7 +21,7 @@ message RegisterResourceHolderRequest{
 }
 
 message GetResourceHoldersResponse{
-    map<int64,HolderRow> Holder = 1;
+    map<uint64,HolderRow> Holder = 1;
 }
 message HolderRow {
     repeated string Ips = 1;

@@ -191,7 +191,7 @@ func (w *Warp) ReadChunk(chunkNo int, isSeeder bool) ([]byte, error) {
 }
 
 // function to create(write) chunk in temp
-func CreateChunk(fileHash string, chunkNo int64, data []byte) {
+func CreateChunk(fileHash string, chunkNo uint64, data []byte) {
 
 	chunkDir := "storage/temp/" + fileHash + "/"
 	chunkPath := chunkDir + fmt.Sprint(chunkNo)
