@@ -86,7 +86,6 @@ func (n *Node) register() {
 
 	_, err := trackerClient.RegisterResourceHolder(ctx, req)
 	if err != nil {
-		log.Printf("In register")
 		log.Printf("could not invoke rpc: %v", err)
 	}
 }

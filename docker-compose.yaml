@@ -1,18 +1,26 @@
 services:
-  redis:
-    image: redis
-    container_name: bitwarp-redis-server
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: bitwarp-rabbitmq
     ports:
-      - "6379:6379"
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - bitwarp-net
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   tracker:
     image: bitwarp-tracker
     networks:
       - bitwarp-net
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_healthy
 
   nginx:
     image: nginx:latest
@@ -25,6 +33,7 @@ services:
       - bitwarp-net
     depends_on:
       - tracker
+
   node:
     image: bitwarp-node
     volumes:

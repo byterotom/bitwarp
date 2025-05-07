@@ -3,6 +3,7 @@ module github.com/Sp92535
 go 1.24.2
 
 require (
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/redis/go-redis/v9 v9.7.3
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5

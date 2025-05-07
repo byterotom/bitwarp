@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+	tracker.ExchangeInit()
 	// run tracker server
 	tracker.RunTrackerServer()
 }

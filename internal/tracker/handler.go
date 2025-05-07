@@ -35,7 +35,7 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 		RemoveExpired(key, ctx)
 
 		// donot append if limit reached -> note: not exiting due to remaining initialization of ips
-		sample := random(3)
+		sample := random(2)
 		arr, err := Rdb.ZRandMember(ctx, key, sample).Result()
 		if len(arr) > 0 {
 			// append random number of ips from 1-5
@@ -55,11 +55,17 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 // implemented function to register client's node server ip in chunk sets
 func (tr *TrackerServer) RegisterResourceHolder(ctx context.Context, req *pbtr.RegisterResourceHolderRequest) (*pbtr.Empty, error) {
 
+	msg := &SyncMessage{
+		sender:    tr.address,
+		node_ip:   req.Address,
+		file_hash: req.FileHash,
+	}
+
 	for chunkNo, ok := range req.Status {
 		if !ok {
 			continue
 		}
-
+		msg.chunks = append(msg.chunks, uint64(chunkNo))
 		// construct key
 		key := fmt.Sprintf("%s:%d", req.FileHash, chunkNo)
 		// construct score
@@ -72,6 +78,10 @@ func (tr *TrackerServer) RegisterResourceHolder(ctx context.Context, req *pbtr.R
 			return nil, err
 		}
 	}
+	if random(15) == random(15) {
+		go Publish(msg)
+	}
+
 	return &pbtr.Empty{}, nil
 }
 
