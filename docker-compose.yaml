@@ -22,13 +22,13 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  nginx:
-    image: nginx:latest
-    container_name: tracker-lb
+  haproxy:
+    image: haproxy:latest
     ports:
       - "9999:9999"
+      - "8404:8404"
     volumes:
-      - ./tracker-lb.conf:/etc/nginx/nginx.conf
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
     networks:
       - bitwarp-net
     depends_on:
@@ -41,7 +41,7 @@ services:
     networks:
       - bitwarp-net
     depends_on:
-      - nginx
+      - haproxy
     command: [ "./node", "get", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
 
   seeder:
@@ -51,7 +51,7 @@ services:
     networks:
       - bitwarp-net
     depends_on:
-      - nginx
+      - haproxy
     command: [ "./node", "seed", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
 
 networks:
