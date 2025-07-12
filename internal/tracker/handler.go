@@ -7,7 +7,7 @@ import (
 	"math/rand/v2"
 	"time"
 
-	pbtr "github.com/Sp92535/proto/tracker/pb"
+	pbtr "github.com/byterotom/proto/tracker/pb"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -56,16 +56,16 @@ func (tr *TrackerServer) GetResourceHolders(ctx context.Context, req *pbtr.GetRe
 func (tr *TrackerServer) RegisterResourceHolder(ctx context.Context, req *pbtr.RegisterResourceHolderRequest) (*pbtr.Empty, error) {
 
 	msg := &SyncMessage{
-		sender:    tr.address,
-		node_ip:   req.Address,
-		file_hash: req.FileHash,
+		Sender:    tr.address,
+		NodeIp:   req.Address,
+		FileHash: req.FileHash,
 	}
 
 	for chunkNo, ok := range req.Status {
 		if !ok {
 			continue
 		}
-		msg.chunks = append(msg.chunks, uint64(chunkNo))
+		msg.Chunks = append(msg.Chunks, uint64(chunkNo))
 		// construct key
 		key := fmt.Sprintf("%s:%d", req.FileHash, chunkNo)
 		// construct score
@@ -78,7 +78,9 @@ func (tr *TrackerServer) RegisterResourceHolder(ctx context.Context, req *pbtr.R
 			return nil, err
 		}
 	}
-	if random(15) == random(15) {
+	r1 := random(15)
+	r2 := random(15)
+	if r1 == r2 {
 		go Publish(msg)
 	}
 

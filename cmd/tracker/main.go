@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Sp92535/internal/tracker"
+	"github.com/byterotom/internal/tracker"
 )
 
 func main() {

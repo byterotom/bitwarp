@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/Sp92535/pkg"
-	pbtr "github.com/Sp92535/proto/tracker/pb"
+	"github.com/byterotom/pkg"
+	pbtr "github.com/byterotom/proto/tracker/pb"
 	"google.golang.org/grpc"
 )
 

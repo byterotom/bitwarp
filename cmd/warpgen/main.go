@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Sp92535/pkg/warpgen"
+	"github.com/byterotom/pkg/warpgen"
 )
 
 func main() {

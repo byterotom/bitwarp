@@ -1,4 +1,4 @@
-module github.com/Sp92535
+module github.com/byterotom
 
 go 1.24.2
 

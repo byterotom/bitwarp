@@ -12,10 +12,10 @@ import (
 )
 
 type SyncMessage struct {
-	sender    string
-	node_ip   string
-	file_hash string
-	chunks    []uint64
+	Sender   string
+	NodeIp   string
+	FileHash string
+	Chunks   []uint64
 }
 
 var conn *amqp.Connection
@@ -115,7 +115,7 @@ func (tr *TrackerServer) Sync() {
 			continue
 		}
 
-		if temp.sender == tr.address {
+		if temp.Sender == tr.address {
 			continue
 		}
 
@@ -123,14 +123,14 @@ func (tr *TrackerServer) Sync() {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			for _, chunkNo := range temp.chunks {
+			for _, chunkNo := range temp.Chunks {
 
 				// construct key
-				key := fmt.Sprintf("%s:%d", temp.file_hash, chunkNo)
+				key := fmt.Sprintf("%s:%d", temp.FileHash, chunkNo)
 				// construct score
 				score := float64(time.Now().Add(TTL).Unix())
 
-				err := Rdb.ZAdd(ctx, key, redis.Z{Score: score, Member: temp.node_ip}).Err()
+				err := Rdb.ZAdd(ctx, key, redis.Z{Score: score, Member: temp.NodeIp}).Err()
 				if err != nil {
 					log.Printf("error adding holder to redis: %v", err)
 				}

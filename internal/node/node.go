@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sp92535/pkg"
-	"github.com/Sp92535/pkg/warpgen"
-	pbno "github.com/Sp92535/proto/node/pb"
-	pbtr "github.com/Sp92535/proto/tracker/pb"
+	"github.com/byterotom/pkg"
+	"github.com/byterotom/pkg/warpgen"
+	pbno "github.com/byterotom/proto/node/pb"
+	pbtr "github.com/byterotom/proto/tracker/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,8 +34,7 @@ type Node struct {
 
 // constructor function to create new node
 func NewNode(warp *warpgen.Warp, isSeeder bool) *Node {
-	var n Node
-	n = Node{
+	var n Node = Node{
 		address:     pkg.GetLocalIp(),
 		warp:        warp,
 		isSeeder:    isSeeder,

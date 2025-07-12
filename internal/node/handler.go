@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	pbno "github.com/Sp92535/proto/node/pb"
+	pbno "github.com/byterotom/proto/node/pb"
 )
 
 // implemented ping function to test connectivity

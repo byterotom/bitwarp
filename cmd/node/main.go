@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/Sp92535/internal/node"
-	"github.com/Sp92535/pkg"
-	"github.com/Sp92535/pkg/warpgen"
+	"github.com/byterotom/internal/node"
+	"github.com/byterotom/pkg"
+	"github.com/byterotom/pkg/warpgen"
 )
 
 func main() {
@@ -48,13 +48,12 @@ func main() {
 		go n.RegisterLoop()
 		select {} // temporarily blocking
 	}
-	
+
 	d := pkg.RTT(n.Download)
 	log.Printf("Downloaded in %f seconds", d)
 
 	// merge all files once all chunks are here
 	m := pkg.RTT(warp.MergeChunks)
 	log.Printf("Merged in %f seconds", m)
-	
 
 }

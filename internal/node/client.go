@@ -3,7 +3,7 @@ package node
 import (
 	"log"
 
-	pbtr "github.com/Sp92535/proto/tracker/pb"
+	pbtr "github.com/byterotom/proto/tracker/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

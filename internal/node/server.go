@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	pbno "github.com/Sp92535/proto/node/pb"
+	pbno "github.com/byterotom/proto/node/pb"
 	"google.golang.org/grpc"
 )
 
