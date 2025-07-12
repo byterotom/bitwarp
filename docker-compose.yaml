@@ -42,7 +42,7 @@ services:
       - bitwarp-net
     depends_on:
       - haproxy
-    command: [ "./node", "get", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
+    command: [ "./node", "get", "storage/warp/<your_warp_json_file>" ]
 
   seeder:
     image: bitwarp-node
@@ -52,7 +52,7 @@ services:
       - bitwarp-net
     depends_on:
       - haproxy
-    command: [ "./node", "seed", "storage/warp/kali-linux-2024.1-installer-amd64.iso.json" ]
+    command: [ "./node", "seed", "storage/warp/<your_warp_json_file>" ]
 
 networks:
   bitwarp-net:
